@@ -1,0 +1,36 @@
+name: Navigation Test - Verify Screen Transitions
+description: Automatically generated test for navigation paths
+steps:
+- name: Start application
+  command: python /home/jonbrookings/vibe_coding_projects/my-orchestro-copy/examples/sample_tui_app/app.py
+  timeout: 5
+- name: Wait for app to initialize
+  wait: 1
+- name: "Navigate: MainMenuScreen \u2192 settings"
+  comment: 'Path cost: 1'
+- name: Press s
+  keystroke: s
+- name: Wait for navigation
+  wait: 0.5
+- name: Verify settings reached
+  screenshot: nav_MainMenuScreen_to_settings.png
+- name: Return to start
+  keystroke: escape
+- name: Wait for return
+  wait: 0.5
+- name: "Navigate: MainMenuScreen \u2192 dashboard"
+  comment: 'Path cost: 1'
+- name: Press d
+  keystroke: d
+- name: Wait for navigation
+  wait: 0.5
+- name: Verify dashboard reached
+  screenshot: nav_MainMenuScreen_to_dashboard.png
+- name: Return to start
+  keystroke: escape
+- name: Wait for return
+  wait: 0.5
+- name: Quit application
+  keystroke: q
+- name: Wait for shutdown
+  wait: 1

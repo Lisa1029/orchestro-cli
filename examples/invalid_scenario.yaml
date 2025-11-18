@@ -1,0 +1,28 @@
+name: Invalid Scenario Example
+description: This scenario has multiple validation errors
+# Missing required 'command' field
+timeout: -10  # Invalid timeout
+
+steps:
+  - expect: "[invalid(regex"  # Invalid regex pattern
+    timeout: "not_a_number"  # Invalid timeout type
+
+  - send: "test"
+    timeout: 0  # Invalid timeout value
+
+  - screenshot: "test@invalid!name#"  # Special characters warning
+
+validations:
+  - type: path_exists
+    # Missing 'path' field
+
+  - type: file_contains
+    path: "test.log"
+    # Missing 'text' field
+
+  - type: unknown_validation_type
+    path: "something"
+
+  - type: file_contains
+    path: "output.log"
+    text: "[invalid(pattern"  # Invalid regex

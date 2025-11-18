@@ -1,0 +1,552 @@
+{
+  "app_name": "Orchestro CLI - Inline Assertion Syntax",
+  "version": "1.0.0",
+  "created_date": "2025-11-16",
+  "target_audience": "Internal",
+  "executive_summary": "Inline assertion syntax feature enabling concise, declarative test assertions directly within YAML scenario steps, reducing test verbosity by 60-70% and improving test readability.",
+
+  "personas": [
+    {
+      "id": "persona_1",
+      "name": "Sarah Chen",
+      "role": "Senior DevOps Engineer",
+      "technical_level": "Advanced",
+      "years_experience": "5+",
+      "primary_goals": [
+        "Automate CLI testing in CI/CD pipelines",
+        "Reduce maintenance burden of test suites",
+        "Quick validation of deployment scripts"
+      ],
+      "pain_points": [
+        "Validation blocks create distance between action and verification",
+        "Difficult to quickly scan tests and understand validations",
+        "Test failures require cross-referencing steps with validations"
+      ],
+      "success_metrics": [
+        "Test authoring time reduced by 50%",
+        "Test maintenance time reduced by 40%",
+        "CI/CD pipeline test execution under 5 minutes"
+      ]
+    },
+    {
+      "id": "persona_2",
+      "name": "Marcus Rodriguez",
+      "role": "Independent CLI Developer",
+      "technical_level": "Intermediate",
+      "years_experience": "2-3",
+      "primary_goals": [
+        "Write comprehensive tests for interactive CLI apps",
+        "Document expected behavior inline with commands",
+        "Enable regression testing for UI changes"
+      ],
+      "pain_points": [
+        "Tests become stale when expectations are far from actions",
+        "Regex patterns in validation blocks are hard to debug",
+        "No quick feedback loop when writing new tests"
+      ],
+      "success_metrics": [
+        "90%+ test coverage for CLI commands",
+        "Test failures pinpoint exact command that failed",
+        "New features include tests from day one"
+      ]
+    }
+  ],
+
+  "features": [
+    {
+      "id": "feature_1",
+      "name": "Exact Output Matching",
+      "priority": "high",
+      "category": "core",
+      "description": "Support inline assertions for exact, partial, and regex-based output matching",
+      "stories": [
+        {
+          "id": "story_1_1",
+          "persona": "persona_1",
+          "as_a": "DevOps Engineer",
+          "i_want_to": "verify exact command output inline",
+          "so_that": "I can quickly validate script behavior"
+        },
+        {
+          "id": "story_1_2",
+          "persona": "persona_2",
+          "as_a": "CLI Developer",
+          "i_want_to": "assert specific text appears in output",
+          "so_that": "I can catch UI regressions"
+        }
+      ],
+      "acceptance_criteria": [
+        "YAML step with expect_output field passes when command output exactly matches string",
+        "YAML step with expect_contains field passes when output includes substring",
+        "YAML step with expect_regex field passes when output matches regex pattern",
+        "Failure messages provide clear diff showing expected vs actual output with character-level precision",
+        "Multi-line output comparison preserves formatting and line breaks",
+        "Case-sensitive matching works by default with optional case_insensitive flag",
+        "Stream selection (stdout vs stderr) configurable via stream field"
+      ],
+      "dependencies": [
+        "StepExecutor",
+        "pexpect output buffer",
+        "difflib for diffs"
+      ],
+      "technical_notes": "Leverage existing pexpect pattern matching. Implement Levenshtein distance for helpful error messages.",
+      "test_scenarios": [
+        "Exact match: send 'echo hello' expect_output 'hello'",
+        "Partial match: send 'ls -la' expect_contains 'total'",
+        "Regex match: send 'date' expect_regex '\\d{4}-\\d{2}-\\d{2}'",
+        "Multi-line: send 'cat file.txt' expect_output with newlines",
+        "Case insensitive: expect_output 'HELLO' case_insensitive true"
+      ]
+    },
+    {
+      "id": "feature_2",
+      "name": "Exit Code Validation",
+      "priority": "high",
+      "category": "core",
+      "description": "Inline exit code assertions for success/failure validation",
+      "stories": [
+        {
+          "id": "story_2_1",
+          "persona": "persona_1",
+          "as_a": "DevOps Engineer",
+          "i_want_to": "verify command exit codes inline",
+          "so_that": "I can detect failures immediately"
+        },
+        {
+          "id": "story_2_2",
+          "persona": "persona_2",
+          "as_a": "CLI Developer",
+          "i_want_to": "test both success and error scenarios",
+          "so_that": "I can validate error handling"
+        }
+      ],
+      "acceptance_criteria": [
+        "Step with expect_code: 0 passes when command exits successfully",
+        "Step with expect_code: 1 passes when command exits with code 1",
+        "Missing expect_code defaults to expecting success (exit code 0)",
+        "Error message includes both expected and actual exit codes on mismatch",
+        "Works with both shell commands and interactive prompts that exit",
+        "Handles timeout scenarios with clear error messaging",
+        "Compatible with send steps that execute commands"
+      ],
+      "dependencies": [
+        "pexpect.spawn.exitstatus",
+        "StepExecutor"
+      ],
+      "technical_notes": "Capture exit code from pexpect process. Handle processes that don't cleanly exit. Support timeout scenarios.",
+      "test_scenarios": [
+        "Success: send 'true' expect_code 0",
+        "Failure: send 'false' expect_code 1",
+        "Custom code: send 'exit 42' expect_code 42",
+        "Default success: send 'echo test' (no expect_code)",
+        "Non-exiting process handling"
+      ]
+    },
+    {
+      "id": "feature_3",
+      "name": "Output Line Counting",
+      "priority": "medium",
+      "category": "validation",
+      "description": "Validate the number of output lines with exact, min, and max assertions",
+      "stories": [
+        {
+          "id": "story_3_1",
+          "persona": "persona_1",
+          "as_a": "DevOps Engineer",
+          "i_want_to": "verify the number of output lines",
+          "so_that": "I can detect missing or extra data"
+        },
+        {
+          "id": "story_3_2",
+          "persona": "persona_2",
+          "as_a": "CLI Developer",
+          "i_want_to": "assert table sizes",
+          "so_that": "I can validate list commands"
+        }
+      ],
+      "acceptance_criteria": [
+        "Step with expect_lines: 5 passes when output has exactly 5 lines",
+        "Step with expect_lines_min: 3 passes when output has 3 or more lines",
+        "Step with expect_lines_max: 10 passes when output has 10 or fewer lines",
+        "Combined expect_lines_min and expect_lines_max creates valid range assertion",
+        "Error message shows actual line count and expected range/value",
+        "Empty lines are configurable (include/exclude via count_empty_lines flag)",
+        "Works with buffered output from send and expect steps"
+      ],
+      "dependencies": [
+        "OutputBuffer",
+        "AssertionEngine"
+      ],
+      "technical_notes": "Efficient line counting without loading entire buffer. Handle various newline formats (\\n, \\r\\n, \\r).",
+      "test_scenarios": [
+        "Exact: send 'ls' expect_lines 5",
+        "Range: send 'cat log.txt' expect_lines_min 10 expect_lines_max 100",
+        "Minimum: send 'ps aux' expect_lines_min 2",
+        "Empty lines: send 'cat sparse.txt' count_empty_lines false"
+      ]
+    },
+    {
+      "id": "feature_4",
+      "name": "File Content Comparison",
+      "priority": "medium",
+      "category": "validation",
+      "description": "Compare command output against golden files for regression testing",
+      "stories": [
+        {
+          "id": "story_4_1",
+          "persona": "persona_1",
+          "as_a": "DevOps Engineer",
+          "i_want_to": "compare command output to golden files",
+          "so_that": "I can detect unexpected changes"
+        },
+        {
+          "id": "story_4_2",
+          "persona": "persona_2",
+          "as_a": "CLI Developer",
+          "i_want_to": "validate generated output matches templates",
+          "so_that": "I can ensure formatting consistency"
+        }
+      ],
+      "acceptance_criteria": [
+        "Step with expect_file: 'expected.txt' compares output to file content",
+        "Failure shows unified diff highlighting character-level differences",
+        "--update-golden CLI flag updates expected files from actual output",
+        "Binary files use hash-based comparison (SHA256)",
+        "Missing golden files provide helpful setup instructions in error message",
+        "File paths are relative to scenario file location",
+        "Both text and binary file comparison modes supported"
+      ],
+      "dependencies": [
+        "difflib.unified_diff",
+        "hashlib.sha256",
+        "pathlib.Path"
+      ],
+      "technical_notes": "Implement unified diff for text. Hash comparison for binary. Safe golden file update with confirmation.",
+      "test_scenarios": [
+        "Text match: send 'cat output.txt' expect_file 'golden/output.txt'",
+        "Binary match: send 'cat image.png' expect_file 'golden/image.png'",
+        "Update golden: orchestro test.yaml --update-golden",
+        "Missing file error handling"
+      ]
+    },
+    {
+      "id": "feature_5",
+      "name": "JSON/YAML Output Validation",
+      "priority": "low",
+      "category": "advanced",
+      "description": "Validate structured data output with JSONPath and YAML path expressions",
+      "stories": [
+        {
+          "id": "story_5_1",
+          "persona": "persona_1",
+          "as_a": "DevOps Engineer",
+          "i_want_to": "validate structured API responses",
+          "so_that": "I can test REST API interactions"
+        },
+        {
+          "id": "story_5_2",
+          "persona": "persona_2",
+          "as_a": "CLI Developer",
+          "i_want_to": "assert specific JSON fields",
+          "so_that": "I can validate configuration outputs"
+        }
+      ],
+      "acceptance_criteria": [
+        "expect_json with object validates entire JSON structure match",
+        "expect_json with JSONPath expression validates specific field (e.g., '$.data.count == 5')",
+        "expect_yaml with object validates YAML structure",
+        "expect_yaml with path validates specific field (e.g., 'config.enabled: true')",
+        "Invalid JSON/YAML provides parse error with line and column number",
+        "Supports nested field validation with dot notation",
+        "Type validation distinguishes between string '5' and number 5",
+        "Array length and content validation supported"
+      ],
+      "dependencies": [
+        "jsonpath-ng (v1.6.0)",
+        "PyYAML (existing)",
+        "json (stdlib)"
+      ],
+      "technical_notes": "Parse output before validation. JSONPath evaluation. Preserve type information. Handle malformed data gracefully.",
+      "test_scenarios": [
+        "Full structure: send 'curl api/status' expect_json '{\"status\": \"ok\"}'",
+        "Field validation: send 'jq .count data.json' expect_json '$.count == 5'",
+        "YAML field: send 'cat config.yml' expect_yaml 'server.port: 8080'",
+        "Type checking: expect_json '$.active == true' (boolean)",
+        "Array validation: expect_json '$.items.length() == 3'"
+      ]
+    }
+  ],
+
+  "constraints": {
+    "technical": {
+      "backward_compatibility": "Must not break existing YAML scenario files without inline assertions",
+      "performance": "Assertion evaluation must add <50ms overhead per step",
+      "memory": "Memory usage must scale linearly with output buffer size, support streaming for >10MB outputs",
+      "platform": "Cross-platform support (Linux, macOS, Windows) required"
+    },
+    "implementation": {
+      "timeline": "6 weeks from approval to production release",
+      "team_size": "1-2 developers",
+      "test_coverage": "Minimum 95% code coverage for assertion engine",
+      "documentation": "20+ real-world examples required"
+    },
+    "quality": {
+      "error_messages": "Must show exact location of failure (line:column) with diff output",
+      "reliability": "All assertions must be deterministic and repeatable",
+      "usability": "Must provide suggested fixes for common mistakes (regex escaping, etc.)"
+    }
+  },
+
+  "integration_map": {
+    "components": {
+      "new": [
+        "AssertionEngine",
+        "OutputMatcher (ExactMatcher, RegexMatcher, ContainsMatcher)",
+        "ExitCodeValidator",
+        "LineCountValidator",
+        "FileComparator",
+        "StructuredDataValidator (JsonValidator, YamlValidator)"
+      ],
+      "modified": [
+        "ScenarioRunner._handle_send() - add assertion evaluation",
+        "ScenarioRunner._handle_expect() - support inline assertions",
+        "JUnitReporter.add_test_case() - include assertion failures",
+        "YAML schema parser - support new assertion fields"
+      ],
+      "existing_dependencies": [
+        "StepExecutor",
+        "ValidationEngine",
+        "pexpect.spawn"
+      ]
+    },
+    "data_flow": [
+      "1. YAML step parsed into StepDefinition with optional assertions",
+      "2. StepExecutor runs command and captures output/exit code",
+      "3. AssertionEngine evaluates inline assertions",
+      "4. Results aggregated into test report",
+      "5. Legacy validation engine runs post-execution (optional)"
+    ],
+    "external_dependencies": [
+      {
+        "name": "jsonpath-ng",
+        "version": "1.6.0",
+        "purpose": "JSONPath expression evaluation",
+        "optional": false
+      },
+      {
+        "name": "PyYAML",
+        "version": "existing",
+        "purpose": "YAML parsing",
+        "optional": false
+      },
+      {
+        "name": "difflib",
+        "version": "stdlib",
+        "purpose": "Unified diff generation",
+        "optional": false
+      }
+    ]
+  },
+
+  "quality_metrics": {
+    "adoption": {
+      "new_tests_using_inline_assertions": "70% within 3 months",
+      "average_test_file_size_reduction": "50 lines",
+      "community_examples_shared": "5+"
+    },
+    "quality": {
+      "assertion_engine_test_coverage": ">95%",
+      "regression_count": "0",
+      "bug_reports_first_release": "<10"
+    },
+    "performance": {
+      "test_execution_time_increase": "<5%",
+      "memory_usage_increase": "<10%",
+      "assertion_evaluation_time": "<50ms per step"
+    }
+  },
+
+  "implementation_phases": [
+    {
+      "phase": 1,
+      "name": "Core Implementation",
+      "duration_weeks": 2,
+      "deliverables": [
+        "AssertionEngine framework",
+        "Exact output matching (expect_output, expect_contains, expect_regex)",
+        "Exit code validation (expect_code)",
+        "Updated YAML parser with new fields"
+      ],
+      "acceptance_criteria": [
+        "All core assertion types functional",
+        "Unit tests at 90%+ coverage",
+        "Integration tests with ScenarioRunner",
+        "Error messages include diffs"
+      ]
+    },
+    {
+      "phase": 2,
+      "name": "Advanced Features",
+      "duration_weeks": 2,
+      "deliverables": [
+        "Line counting validation (expect_lines, expect_lines_min, expect_lines_max)",
+        "File comparison (expect_file)",
+        "JSON/YAML validation (expect_json, expect_yaml)",
+        "Enhanced error messages with suggestions"
+      ],
+      "acceptance_criteria": [
+        "All advanced assertion types functional",
+        "Golden file workflow operational",
+        "JSONPath and YAML path evaluation working",
+        "Comprehensive test suite"
+      ]
+    },
+    {
+      "phase": 3,
+      "name": "Integration",
+      "duration_weeks": 1,
+      "deliverables": [
+        "JUnit XML integration for assertion failures",
+        "Documentation with 20+ examples",
+        "Migration guide for existing tests",
+        "CLI flags (--update-golden, --strict-assertions)"
+      ],
+      "acceptance_criteria": [
+        "JUnit reports include assertion details",
+        "Documentation complete and reviewed",
+        "Migration examples tested",
+        "All CLI flags functional"
+      ]
+    },
+    {
+      "phase": 4,
+      "name": "Stabilization",
+      "duration_weeks": 1,
+      "deliverables": [
+        "Bug fixes from testing",
+        "Performance optimization",
+        "Community feedback integration",
+        "Release candidate preparation"
+      ],
+      "acceptance_criteria": [
+        "Zero critical bugs",
+        "Performance benchmarks meet targets",
+        "Documentation reflects all changes",
+        "Ready for production release"
+      ]
+    }
+  ],
+
+  "syntax_options": {
+    "compact_syntax": {
+      "description": "Recommended inline syntax for most use cases",
+      "example": "steps:\n  - send: \"echo hello\"\n    expect_output: \"hello\"\n    expect_code: 0"
+    },
+    "verbose_syntax": {
+      "description": "Explicit assertion blocks for complex scenarios",
+      "example": "steps:\n  - send: \"echo hello\"\n    assertions:\n      - type: output_exact\n        value: \"hello\"\n      - type: exit_code\n        value: 0"
+    },
+    "backward_compatible": {
+      "description": "Existing validation syntax continues to work",
+      "example": "steps:\n  - send: \"echo hello\"\nvalidations:\n  - type: file_contains\n    path: output.log\n    text: \"hello\""
+    }
+  },
+
+  "risk_assessment": [
+    {
+      "risk": "Breaking backward compatibility",
+      "likelihood": "Low",
+      "impact": "High",
+      "mitigation": "Comprehensive test suite, deprecation warnings, legacy validation support"
+    },
+    {
+      "risk": "Performance degradation",
+      "likelihood": "Medium",
+      "impact": "Medium",
+      "mitigation": "Benchmark suite, streaming validation, performance targets in acceptance criteria"
+    },
+    {
+      "risk": "Complex error messages",
+      "likelihood": "Medium",
+      "impact": "High",
+      "mitigation": "User testing, iterative refinement, clear diff output"
+    },
+    {
+      "risk": "Scope creep (too many assertion types)",
+      "likelihood": "High",
+      "impact": "Medium",
+      "mitigation": "MVP focus on 5 core types, plugin architecture for future extensions"
+    }
+  ],
+
+  "required_clarifications": [
+    "Should assertions short-circuit (fail fast) or collect all failures before reporting?",
+    "Should expect_output match full output buffer or just most recent command output?",
+    "How should assertions interact with screenshot steps (skip, error, or special handling)?",
+    "Should there be a global assertion mode flag (strict vs lenient) for backward compatibility?",
+    "What's the precedence when both inline assertions and legacy validations exist for same step?"
+  ],
+
+  "assertion_type_reference": [
+    {
+      "field": "expect_output",
+      "type": "string",
+      "description": "Exact output match (full string equality)",
+      "example": "expect_output: \"hello world\""
+    },
+    {
+      "field": "expect_contains",
+      "type": "string",
+      "description": "Partial output match (substring search)",
+      "example": "expect_contains: \"success\""
+    },
+    {
+      "field": "expect_regex",
+      "type": "string",
+      "description": "Regex pattern match",
+      "example": "expect_regex: \"\\\\d{3}-\\\\d{3}-\\\\d{4}\""
+    },
+    {
+      "field": "expect_code",
+      "type": "integer",
+      "description": "Exit code validation",
+      "example": "expect_code: 0"
+    },
+    {
+      "field": "expect_lines",
+      "type": "integer",
+      "description": "Exact line count",
+      "example": "expect_lines: 5"
+    },
+    {
+      "field": "expect_lines_min",
+      "type": "integer",
+      "description": "Minimum line count",
+      "example": "expect_lines_min: 3"
+    },
+    {
+      "field": "expect_lines_max",
+      "type": "integer",
+      "description": "Maximum line count",
+      "example": "expect_lines_max: 10"
+    },
+    {
+      "field": "expect_file",
+      "type": "path",
+      "description": "Compare output to file content (golden file)",
+      "example": "expect_file: \"golden/expected.txt\""
+    },
+    {
+      "field": "expect_json",
+      "type": "object|string",
+      "description": "JSON structure or JSONPath validation",
+      "example": "expect_json: {\"status\": \"ok\"}"
+    },
+    {
+      "field": "expect_yaml",
+      "type": "object|string",
+      "description": "YAML structure or path validation",
+      "example": "expect_yaml: \"config.enabled: true\""
+    }
+  ]
+}

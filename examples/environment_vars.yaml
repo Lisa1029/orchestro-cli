@@ -1,0 +1,260 @@
+name: Environment Variables Demonstration
+description: |
+  Demonstrates how to use environment variables in Orchestro scenarios.
+  Shows environment variable injection, usage, and validation.
+
+  This example demonstrates:
+  - Setting custom environment variables in scenarios
+  - Using environment variables in commands
+  - Accessing predefined Orchestro environment variables
+  - Environment variable validation
+  - Best practices for environment configuration
+
+  Orchestro automatically sets:
+  - VYB_AUTO_SCREENSHOT=1 (enables screenshot monitoring)
+  - HOME=<workspace>/home (if workspace is specified)
+  - VYB_DATA_ROOT=<workspace>/data (if workspace is specified)
+
+  Custom environment variables are defined in the 'env' section
+  and are available to the command being tested.
+
+  Requirements: Bash shell
+
+command: bash
+timeout: 30
+
+# Custom environment variables for this scenario
+env:
+  # Application configuration
+  APP_NAME: "OrchestroTestApp"
+  APP_VERSION: "2.1.0"
+  APP_ENV: "testing"
+
+  # Feature flags
+  ENABLE_LOGGING: "true"
+  ENABLE_DEBUG: "false"
+  ENABLE_METRICS: "true"
+
+  # Paths and locations
+  DATA_DIR: "/tmp/orchestro-data"
+  LOG_FILE: "/tmp/orchestro-test.log"
+  CONFIG_PATH: "./config/test.conf"
+
+  # API configuration
+  API_ENDPOINT: "https://api.example.com/v1"
+  API_KEY: "test-key-12345"
+  API_TIMEOUT: "30"
+
+  # Database configuration
+  DB_HOST: "localhost"
+  DB_PORT: "5432"
+  DB_NAME: "orchestro_test_db"
+  DB_USER: "test_user"
+
+  # Numeric configurations
+  MAX_WORKERS: "4"
+  BATCH_SIZE: "100"
+  RETRY_COUNT: "3"
+
+steps:
+  # Wait for bash prompt
+  - expect: "[$#]"
+    timeout: 5
+    note: "Waiting for bash shell..."
+
+  # Display Orchestro auto-set environment variables
+  - send: "echo '=== Orchestro Environment Variables ==='"
+    note: "Checking Orchestro-provided environment..."
+
+  - send: "echo \"VYB_AUTO_SCREENSHOT: $VYB_AUTO_SCREENSHOT\""
+
+  - expect: "VYB_AUTO_SCREENSHOT: 1"
+    timeout: 2
+    note: "Verifying Orchestro set VYB_AUTO_SCREENSHOT..."
+
+  # Display custom environment variables
+  - send: "echo '=== Custom Application Variables ==='"
+
+  - send: "echo \"App: $APP_NAME v$APP_VERSION ($APP_ENV)\""
+
+  - expect: "App: OrchestroTestApp v2.1.0 \\(testing\\)"
+    timeout: 2
+    note: "Verifying app configuration variables..."
+
+  # Verify feature flags
+  - send: "echo '=== Feature Flags ==='"
+
+  - send: "echo \"Logging: $ENABLE_LOGGING, Debug: $ENABLE_DEBUG, Metrics: $ENABLE_METRICS\""
+
+  - expect: "Logging: true, Debug: false, Metrics: true"
+    timeout: 2
+    note: "Verifying feature flags..."
+
+  # Use environment variables in conditionals
+  - send: "if [ \"$ENABLE_LOGGING\" = \"true\" ]; then echo 'Logging is ENABLED'; else echo 'Logging is DISABLED'; fi"
+
+  - expect: "Logging is ENABLED"
+    timeout: 2
+    note: "Testing conditional logic with environment variables..."
+
+  # Create directory structure using env vars
+  - send: "mkdir -p $DATA_DIR"
+    note: "Creating data directory from environment variable..."
+
+  # Verify numeric environment variables
+  - send: "echo '=== Numeric Configuration ==='"
+
+  - send: "echo \"Workers: $MAX_WORKERS, Batch: $BATCH_SIZE, Retries: $RETRY_COUNT\""
+
+  - expect: "Workers: 4, Batch: 100, Retries: 3"
+    timeout: 2
+    note: "Verifying numeric configuration..."
+
+  # Perform calculation with env vars
+  - send: "TOTAL_CAPACITY=$((MAX_WORKERS * BATCH_SIZE))"
+
+  - send: "echo \"Total capacity: $TOTAL_CAPACITY items\""
+
+  - expect: "Total capacity: 400 items"
+    timeout: 2
+    note: "Testing arithmetic with environment variables..."
+
+  # Create configuration file using env vars
+  - send: "cat > env_test_config.ini << EOF\n[application]\nname=$APP_NAME\nversion=$APP_VERSION\nenvironment=$APP_ENV\n\n[features]\nlogging=$ENABLE_LOGGING\ndebug=$ENABLE_DEBUG\nmetrics=$ENABLE_METRICS\n\n[paths]\ndata_dir=$DATA_DIR\nlog_file=$LOG_FILE\nconfig_path=$CONFIG_PATH\n\n[api]\nendpoint=$API_ENDPOINT\nkey=$API_KEY\ntimeout=$API_TIMEOUT\n\n[database]\nhost=$DB_HOST\nport=$DB_PORT\nname=$DB_NAME\nuser=$DB_USER\n\n[performance]\nmax_workers=$MAX_WORKERS\nbatch_size=$BATCH_SIZE\nretry_count=$RETRY_COUNT\nEOF"
+    note: "Creating configuration file from environment variables..."
+
+  - send: "echo 'Configuration written'"
+
+  - expect: "Configuration written"
+    timeout: 2
+
+  # Display the created configuration
+  - send: "echo '=== Generated Configuration ==='"
+
+  - send: "cat env_test_config.ini"
+
+  - expect: "name=OrchestroTestApp"
+    timeout: 2
+    note: "Verifying configuration file content..."
+
+  # Create a summary report
+  - send: "cat > env_test_report.txt << EOF\nEnvironment Variables Test Report\n==================================\n\nTest Date: $(date)\n\nOrchestro Variables:\n- VYB_AUTO_SCREENSHOT: $VYB_AUTO_SCREENSHOT\n\nApplication Configuration:\n- Name: $APP_NAME\n- Version: $APP_VERSION\n- Environment: $APP_ENV\n\nFeature Flags:\n- Logging: $ENABLE_LOGGING\n- Debug: $ENABLE_DEBUG\n- Metrics: $ENABLE_METRICS\n\nPaths:\n- Data Directory: $DATA_DIR\n- Log File: $LOG_FILE\n- Config Path: $CONFIG_PATH\n\nAPI Configuration:\n- Endpoint: $API_ENDPOINT\n- Timeout: $API_TIMEOUT seconds\n\nDatabase Configuration:\n- Host: $DB_HOST:$DB_PORT\n- Database: $DB_NAME\n- User: $DB_USER\n\nPerformance Settings:\n- Max Workers: $MAX_WORKERS\n- Batch Size: $BATCH_SIZE\n- Total Capacity: $((MAX_WORKERS * BATCH_SIZE)) items\n- Retry Count: $RETRY_COUNT\n\nStatus: All environment variables loaded and validated successfully\nEOF"
+    note: "Creating comprehensive report..."
+
+  - send: "echo 'Report generated'"
+
+  - expect: "Report generated"
+    timeout: 2
+
+  # Demonstrate environment variable override behavior
+  - send: "echo '=== Testing Variable Override ==='"
+
+  - send: "ORIGINAL_VALUE=$APP_ENV"
+
+  - send: "export APP_ENV='production'"
+
+  - send: "echo \"Original: $ORIGINAL_VALUE, Modified: $APP_ENV\""
+
+  - expect: "Original: testing, Modified: production"
+    timeout: 2
+    note: "Demonstrating variable override..."
+
+  # Final status
+  - send: "echo '=== Environment variables test complete ==='"
+
+  - send: "exit"
+    note: "Exiting bash..."
+
+validations:
+  # Validate data directory creation
+  - type: path_exists
+    path: /tmp/orchestro-data
+    description: "Data directory created using environment variable"
+
+  # Validate configuration file
+  - type: path_exists
+    path: env_test_config.ini
+    description: "Configuration file created"
+
+  - type: file_contains
+    path: env_test_config.ini
+    text: "\\[application\\]"
+    description: "Config file has application section"
+
+  - type: file_contains
+    path: env_test_config.ini
+    text: "name=OrchestroTestApp"
+    description: "Config has correct app name from env var"
+
+  - type: file_contains
+    path: env_test_config.ini
+    text: "version=2\\.1\\.0"
+    description: "Config has correct version from env var"
+
+  - type: file_contains
+    path: env_test_config.ini
+    text: "environment=testing"
+    description: "Config has correct environment from env var"
+
+  - type: file_contains
+    path: env_test_config.ini
+    text: "logging=true"
+    description: "Config has correct feature flag"
+
+  - type: file_contains
+    path: env_test_config.ini
+    text: "endpoint=https://api\\.example\\.com/v1"
+    description: "Config has correct API endpoint from env var"
+
+  - type: file_contains
+    path: env_test_config.ini
+    text: "max_workers=4"
+    description: "Config has correct numeric value from env var"
+
+  # Validate report file
+  - type: path_exists
+    path: env_test_report.txt
+    description: "Report file created"
+
+  - type: file_contains
+    path: env_test_report.txt
+    text: "VYB_AUTO_SCREENSHOT: 1"
+    description: "Report shows Orchestro auto-set variable"
+
+  - type: file_contains
+    path: env_test_report.txt
+    text: "Name: OrchestroTestApp"
+    description: "Report contains app name from env var"
+
+  - type: file_contains
+    path: env_test_report.txt
+    text: "Total Capacity: 400 items"
+    description: "Report shows calculated value from env vars"
+
+  - type: file_contains
+    path: env_test_report.txt
+    text: "Status: All environment variables loaded and validated successfully"
+    description: "Report indicates successful validation"
+
+# ENVIRONMENT VARIABLE BEST PRACTICES:
+#
+# 1. Group related variables (app config, features, paths, etc.)
+# 2. Use UPPER_CASE naming convention
+# 3. Use descriptive names (ENABLE_LOGGING not just LOGGING)
+# 4. Provide sensible defaults
+# 5. Document variable purpose in comments
+# 6. Use boolean strings ("true"/"false") for flags
+# 7. Quote numeric values in YAML to preserve as strings
+# 8. Use absolute paths for file/directory locations
+# 9. Keep sensitive data (passwords, keys) in separate secure config
+# 10. Test variable access patterns in your scenarios
+#
+# COMMON USE CASES:
+# - Application configuration (name, version, environment)
+# - Feature flags (enable/disable features)
+# - Path configuration (data dirs, log files, config files)
+# - API configuration (endpoints, keys, timeouts)
+# - Database configuration (host, port, credentials)
+# - Performance tuning (workers, batch sizes, timeouts)
+# - Test isolation (separate test data directories)
+# - Build configuration (debug mode, optimization levels)

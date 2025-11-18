@@ -1,0 +1,15 @@
+name: Smoke Test - Visit All Screens
+description: Automatically generated smoke test that visits all screens and captures
+  screenshots
+steps:
+- name: Start application
+  command: python /home/jonbrookings/vibe_coding_projects/my-orchestro-copy/examples/sample_tui_app/app.py
+  timeout: 5
+- name: Wait for app to initialize
+  wait: 1
+- name: Capture MainMenuScreen screenshot
+  screenshot: mainmenuscreen_screen.png
+- name: Quit application
+  keystroke: q
+- name: Wait for shutdown
+  wait: 1

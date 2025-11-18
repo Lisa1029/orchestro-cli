@@ -1,0 +1,27 @@
+name: Basic Echo Test
+description: |
+  Simplest possible Orchestro test - demonstrates basic command execution
+  and output validation without any interactive elements.
+
+  This example shows:
+  - Running a simple shell command
+  - Using expect to wait for output patterns
+  - Basic timeout configuration
+
+command: echo "Hello from Orchestro CLI!"
+timeout: 5
+
+steps:
+  # Wait for the echo output
+  - expect: "Hello from Orchestro"
+    timeout: 2
+    note: "Waiting for echo output..."
+
+  # Alternative: match the full output with regex
+  - expect: "Hello from Orchestro CLI!"
+    timeout: 1
+    note: "Validating complete output..."
+
+# Note: This simple example has no file validations
+# since echo just writes to stdout
+validations: []

@@ -1,0 +1,34 @@
+name: VyB Continue Screenshot Test (No Expects)
+description: Screenshot-only test using file triggers
+command: ./vyb_cn
+timeout: 30
+
+steps:
+  # Wait for app to start
+  - note: "Waiting 5 seconds for app initialization..."
+
+  # Capture screenshots at intervals
+  - screenshot: "01-startup"
+    timeout: 15
+    note: "Capturing startup state..."
+
+  - screenshot: "02-after-5sec"
+    timeout: 15
+    note: "Capturing after 5 seconds..."
+
+  - screenshot: "03-final"
+    timeout: 15
+    note: "Capturing final state..."
+
+validations:
+  - type: path_exists
+    path: artifacts/screenshots/01-startup.svg
+    description: "Startup screenshot created"
+
+  - type: path_exists
+    path: artifacts/screenshots/02-after-5sec.svg
+    description: "Second screenshot created"
+
+  - type: path_exists
+    path: artifacts/screenshots/03-final.svg
+    description: "Final screenshot created"

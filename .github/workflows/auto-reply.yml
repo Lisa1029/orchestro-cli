@@ -1,0 +1,143 @@
+name: Auto-Reply to Issues
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  auto_reply:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Auto-Reply
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = context.payload.issue;
+            const body = issue.body?.toLowerCase() || '';
+            const title = issue.title.toLowerCase();
+
+            let reply = '';
+            let labels = [];
+
+            // Feature request
+            if (body.includes('feature') || body.includes('enhancement') || title.includes('feature')) {
+              labels.push('enhancement');
+              reply = `Thanks for the feature request! 🚀
+
+            We track all feature requests and prioritize based on community interest.
+
+            **Next Steps**:
+            1. ⭐ Star this issue to show support
+            2. 📝 Provide use cases/examples in comments
+            3. 💬 Join our [Discord](https://discord.gg/orchestro) for discussion
+
+            We'll review this in our next planning session!`;
+            }
+
+            // Bug report
+            else if (body.includes('bug') || body.includes('error') || body.includes('crash') || title.includes('bug')) {
+              labels.push('bug');
+              reply = `Thanks for the bug report! 🐛
+
+            **To help us fix this quickly, please provide**:
+            - Orchestro version: \`orchestro --version\`
+            - Python version: \`python --version\`
+            - OS: (Windows/Mac/Linux)
+            - Minimal reproduction steps
+            - Expected vs actual behavior
+
+            **Helpful Resources**:
+            - [Troubleshooting Guide](https://github.com/${context.repo.owner}/${context.repo.repo}/blob/main/docs/TROUBLESHOOTING.md)
+            - [Discord #help](https://discord.gg/orchestro)
+
+            We'll investigate ASAP!`;
+            }
+
+            // Installation help
+            else if (body.includes('install') || body.includes('setup') || title.includes('install')) {
+              labels.push('question');
+              reply = `Welcome to Orchestro! 👋
+
+            **Installation**:
+            \`\`\`bash
+            pip install orchestro-cli
+            orchestro --version
+            \`\`\`
+
+            **Quick Start**:
+            \`\`\`bash
+            # Run demo
+            orchestro run examples/demo.yaml
+
+            # Start API server
+            orchestro api serve --reload
+            \`\`\`
+
+            **Resources**:
+            - [Installation Guide](https://github.com/${context.repo.owner}/${context.repo.repo}#installation)
+            - [Getting Started Tutorial](https://github.com/${context.repo.owner}/${context.repo.repo}/blob/main/docs/GETTING_STARTED.md)
+            - [Discord #help](https://discord.gg/orchestro)
+
+            Still stuck? Reply here with your error message!`;
+            }
+
+            // Documentation
+            else if (body.includes('documentation') || body.includes('docs') || title.includes('doc')) {
+              labels.push('documentation');
+              reply = `Thanks for helping improve our documentation! 📚
+
+            **Documentation Links**:
+            - [Main Docs](https://github.com/${context.repo.owner}/${context.repo.repo}/tree/main/docs)
+            - [API Reference](https://github.com/${context.repo.owner}/${context.repo.repo}/blob/main/docs/API_DOCUMENTATION.md)
+            - [Examples](https://github.com/${context.repo.owner}/${context.repo.repo}/tree/main/examples)
+
+            Want to contribute? Check our [Contributing Guide](https://github.com/${context.repo.owner}/${context.repo.repo}/blob/main/CONTRIBUTING.md)`;
+            }
+
+            // Question
+            else if (body.includes('how to') || body.includes('question') || title.includes('question')) {
+              labels.push('question');
+              reply = `Thanks for your question! 💬
+
+            **Quick Resources**:
+            - [Documentation](https://github.com/${context.repo.owner}/${context.repo.repo}/tree/main/docs)
+            - [FAQ](https://github.com/${context.repo.owner}/${context.repo.repo}/blob/main/docs/FAQ.md)
+            - [Examples](https://github.com/${context.repo.owner}/${context.repo.repo}/tree/main/examples)
+            - [Discord Community](https://discord.gg/orchestro)
+
+            We'll respond soon! For faster help, join our Discord.`;
+            }
+
+            // Default welcome message
+            else {
+              reply = `Thanks for opening this issue! 👋
+
+            A maintainer will review this soon. In the meantime:
+            - ⭐ Star the repo if you find it useful
+            - 💬 Join our [Discord](https://discord.gg/orchestro)
+            - 📚 Check our [docs](https://github.com/${context.repo.owner}/${context.repo.repo}/tree/main/docs)
+
+            For urgent issues, ping us on Discord!`;
+            }
+
+            // Add comment
+            if (reply) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: reply
+              });
+            }
+
+            // Add labels
+            if (labels.length > 0) {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                labels: labels
+              });
+            }

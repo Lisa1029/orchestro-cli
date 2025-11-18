@@ -1,0 +1,49 @@
+name: Dry-Run Demo Scenario
+description: Comprehensive example demonstrating all dry-run validation features
+command: echo "Test Application"
+timeout: 60
+env:
+  TEST_MODE: "true"
+  DEBUG_LEVEL: "2"
+
+steps:
+  - note: "Step 1: Initialize application"
+    send: "start"
+
+  - note: "Step 2: Wait for ready prompt"
+    expect: "Ready>"
+    timeout: 10
+
+  - note: "Step 3: Capture initial state"
+    screenshot: "01-initial-state"
+    timeout: 15
+
+  - note: "Step 4: Send help command"
+    send: "help"
+
+  - note: "Step 5: Expect help output"
+    expect: "Available commands:"
+
+  - note: "Step 6: Screenshot after help"
+    screenshot: "02-help-screen"
+
+  - note: "Step 7: Test raw input"
+    send: "test"
+    raw: true
+
+  - note: "Step 8: Send control character"
+    control: "c"
+
+validations:
+  - type: path_exists
+    path: artifacts/screenshots/01-initial-state.svg
+    description: "Initial state screenshot exists"
+
+  - type: path_exists
+    path: artifacts/screenshots/02-help-screen.svg
+    description: "Help screen screenshot exists"
+
+  - type: file_contains
+    path: output.log
+    text: "Success.*\\d+"
+    description: "Output log contains success pattern"

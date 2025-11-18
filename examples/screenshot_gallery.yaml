@@ -1,0 +1,156 @@
+name: Generic TUI Screenshot Gallery
+description: |
+  Demonstrates automated screenshot capture for Terminal User Interface (TUI) applications.
+  This is a generic example showing how to capture multiple screenshots during app execution.
+
+  This example shows:
+  - Automated screenshot capture at different stages
+  - Screenshot trigger mechanism
+  - Screenshot file validation
+  - Timed screenshot sequences
+
+  REQUIREMENTS:
+  - Your TUI app must implement screenshot trigger monitoring
+  - App should watch: $TMPDIR/.vyb_orchestro/screenshot_triggers/
+  - App should save screenshots to: artifacts/screenshots/
+  - When trigger file {name}.trigger is created, app should:
+    1. Capture screenshot as {name}.svg
+    2. Delete the trigger file
+
+  INTEGRATION EXAMPLE (for Textual apps):
+
+  ```python
+  import os
+  import tempfile
+  from pathlib import Path
+  from textual.app import App
+
+  class MyApp(App):
+      def on_mount(self) -> None:
+          if os.getenv("VYB_AUTO_SCREENSHOT"):
+              self.set_interval(0.5, self._check_screenshot_triggers)
+
+      def _check_screenshot_triggers(self) -> None:
+          trigger_dir = Path(tempfile.gettempdir()) / ".vyb_orchestro" / "screenshot_triggers"
+          if not trigger_dir.exists():
+              return
+
+          for trigger_file in trigger_dir.glob("*.trigger"):
+              try:
+                  screenshot_name = trigger_file.stem
+                  screenshot_dir = Path.cwd() / "artifacts" / "screenshots"
+                  screenshot_dir.mkdir(parents=True, exist_ok=True)
+
+                  self.save_screenshot(
+                      filename=f"{screenshot_name}.svg",
+                      path=str(screenshot_dir)
+                  )
+                  trigger_file.unlink()
+              except Exception as e:
+                  pass
+  ```
+
+  USAGE:
+  - Replace './your_tui_app' with your actual TUI application command
+  - Add send steps between screenshots to navigate your app
+  - Adjust timeouts based on your app's responsiveness
+
+# REPLACE THIS with your actual TUI application command
+command: ./your_tui_app
+timeout: 90
+
+steps:
+  # Capture initial startup state
+  - screenshot: "01-startup"
+    timeout: 15
+    note: "Capturing application startup state..."
+
+  # Navigate to main screen (customize for your app)
+  - send: "\r"  # Press Enter
+    note: "Navigating to main screen..."
+
+  - screenshot: "02-main-screen"
+    timeout: 15
+    note: "Capturing main screen..."
+
+  # Navigate to settings or menu (customize for your app)
+  - send: "s"  # Example: 's' key for settings
+    note: "Opening settings menu..."
+
+  - screenshot: "03-settings"
+    timeout: 15
+    note: "Capturing settings screen..."
+
+  # Navigate to another section (customize for your app)
+  - send: "d"  # Example: 'd' key for dashboard
+    note: "Opening dashboard..."
+
+  - screenshot: "04-dashboard"
+    timeout: 15
+    note: "Capturing dashboard..."
+
+  # Perform an action (customize for your app)
+  - send: "a"  # Example: 'a' key for action
+    note: "Triggering an action..."
+
+  - screenshot: "05-action-result"
+    timeout: 15
+    note: "Capturing action result..."
+
+  # Navigate to help or info screen (customize for your app)
+  - send: "h"  # Example: 'h' key for help
+    note: "Opening help screen..."
+
+  - screenshot: "06-help"
+    timeout: 15
+    note: "Capturing help screen..."
+
+  # Return to main screen (customize for your app)
+  - send: "q"  # Example: 'q' to quit help
+    note: "Returning to main screen..."
+
+  - screenshot: "07-final-state"
+    timeout: 15
+    note: "Capturing final state..."
+
+  # Exit application gracefully (customize for your app)
+  - send: "q"  # Common exit key
+    note: "Exiting application..."
+
+validations:
+  # Verify all screenshots were captured
+  - type: path_exists
+    path: artifacts/screenshots/01-startup.svg
+    description: "Startup screenshot captured"
+
+  - type: path_exists
+    path: artifacts/screenshots/02-main-screen.svg
+    description: "Main screen screenshot captured"
+
+  - type: path_exists
+    path: artifacts/screenshots/03-settings.svg
+    description: "Settings screenshot captured"
+
+  - type: path_exists
+    path: artifacts/screenshots/04-dashboard.svg
+    description: "Dashboard screenshot captured"
+
+  - type: path_exists
+    path: artifacts/screenshots/05-action-result.svg
+    description: "Action result screenshot captured"
+
+  - type: path_exists
+    path: artifacts/screenshots/06-help.svg
+    description: "Help screen screenshot captured"
+
+  - type: path_exists
+    path: artifacts/screenshots/07-final-state.svg
+    description: "Final state screenshot captured"
+
+# CUSTOMIZATION NOTES:
+# 1. Update the 'command' field with your actual TUI app
+# 2. Modify 'send' steps to match your app's key bindings
+# 3. Adjust screenshot names to reflect your app's screens
+# 4. Add or remove steps based on your app's workflow
+# 5. Update timeout values based on your app's responsiveness
+# 6. Ensure your app implements the screenshot trigger monitoring code

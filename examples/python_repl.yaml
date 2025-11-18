@@ -1,0 +1,75 @@
+name: Python REPL Interactive Session
+description: |
+  Demonstrates interactive command-line testing with Python's REPL.
+  Shows how to use expect/send patterns for interactive sessions.
+
+  This example demonstrates:
+  - Waiting for prompts with expect patterns
+  - Sending commands to interactive shells
+  - Multiple expect/send cycles
+  - Proper session cleanup with exit command
+
+  Requirements: Python 3.x installed on system
+
+command: ["python3", "-i"]
+timeout: 30
+
+steps:
+  # Wait for Python to start and show prompt
+  - expect: ">>>"
+    timeout: 5
+    note: "Waiting for Python interactive prompt..."
+
+  # Execute a simple calculation
+  - send: "2 + 2"
+    note: "Sending simple calculation..."
+
+  # Verify the result
+  - expect: "4"
+    timeout: 2
+    note: "Verifying calculation result..."
+
+  # Wait for next prompt
+  - expect: ">>>"
+    timeout: 2
+
+  # Define a function
+  - send: "def greet(name): return f'Hello, {name}!'"
+    note: "Defining a function..."
+
+  - expect: ">>>"
+    timeout: 2
+
+  # Call the function
+  - send: "greet('Orchestro')"
+    note: "Calling the function..."
+
+  # Verify function output
+  - expect: "Hello, Orchestro!"
+    timeout: 2
+    note: "Verifying function output..."
+
+  # Wait for prompt again
+  - expect: ">>>"
+    timeout: 2
+
+  # Import a module and use it
+  - send: "import math"
+    note: "Importing math module..."
+
+  - expect: ">>>"
+    timeout: 2
+
+  - send: "math.pi"
+    note: "Getting value of pi..."
+
+  - expect: "3.14159"
+    timeout: 2
+    note: "Verifying pi value..."
+
+  # Clean exit
+  - send: "exit()"
+    note: "Exiting Python REPL..."
+
+# No file validations for this interactive session
+validations: []

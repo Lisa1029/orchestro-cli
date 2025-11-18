@@ -1,0 +1,29 @@
+name: Simple Cat Demo
+description: Demo using cat command (stays alive until EOF)
+
+command: cat
+timeout: 10
+
+steps:
+  # Send a line to cat
+  - send: "Hello from Orchestro!"
+    note: "Sending first line"
+
+  # Cat echoes it back
+  - expect: "Hello from Orchestro!"
+    timeout: 2
+    note: "Verifying echo"
+
+  # Send another line
+  - send: "Testing line 2"
+    note: "Sending second line"
+
+  - expect: "Testing line 2"
+    timeout: 2
+    note: "Verifying second line"
+
+  # Send EOF to exit cat
+  - control: "d"
+    note: "Sending EOF to exit"
+
+validations: []

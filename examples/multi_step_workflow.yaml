@@ -1,0 +1,181 @@
+name: Multi-Step Workflow Test
+description: |
+  Complex workflow demonstrating a complete data processing pipeline.
+  Combines multiple operations: setup, processing, validation, cleanup.
+
+  This example demonstrates:
+  - Multi-phase workflow execution
+  - Directory creation and management
+  - Data transformation pipeline
+  - Comprehensive validation checks
+  - Environment variable usage
+  - Both expect patterns and file validations
+
+  Simulates a real-world data processing scenario:
+  1. Setup: Create directories and initial data
+  2. Process: Transform data through pipeline
+  3. Validate: Check outputs and results
+  4. Report: Generate summary statistics
+
+command: bash
+timeout: 60
+
+env:
+  PIPELINE_NAME: "orchestro-test-pipeline"
+  DATA_VERSION: "v1.0.0"
+
+steps:
+  # Wait for bash prompt
+  - expect: "[$#]"
+    timeout: 5
+    note: "Waiting for bash shell..."
+
+  # Phase 1: Setup
+  - send: "echo '=== PHASE 1: Setup ==="
+    note: "Starting setup phase..."
+
+  - send: "mkdir -p pipeline/{input,output,logs,temp}"
+    note: "Creating directory structure..."
+
+  - send: "echo 'Setup complete'"
+
+  - expect: "Setup complete"
+    timeout: 3
+
+  # Phase 2: Create sample data
+  - send: "echo '=== PHASE 2: Data Creation ==="
+
+  - send: "cat > pipeline/input/data.csv << 'EOF'\nid,name,value\n1,alpha,100\n2,beta,200\n3,gamma,300\n4,delta,400\n5,epsilon,500\nEOF"
+    note: "Creating sample CSV data..."
+
+  - send: "echo 'Data created'"
+
+  - expect: "Data created"
+    timeout: 3
+
+  # Phase 3: Process data
+  - send: "echo '=== PHASE 3: Processing ==="
+
+  # Count records
+  - send: "RECORD_COUNT=$(tail -n +2 pipeline/input/data.csv | wc -l)"
+
+  # Calculate sum
+  - send: "SUM=$(tail -n +2 pipeline/input/data.csv | cut -d',' -f3 | paste -sd+ | bc)"
+
+  # Transform data (uppercase names)
+  - send: "tail -n +2 pipeline/input/data.csv | awk -F',' '{print $1\",\"toupper($2)\",\"$3}' > pipeline/output/transformed.csv"
+    note: "Transforming data..."
+
+  # Generate summary
+  - send: "cat > pipeline/output/summary.txt << EOF\nPipeline: $PIPELINE_NAME\nVersion: $DATA_VERSION\nRecords: $RECORD_COUNT\nTotal Value: $SUM\nStatus: SUCCESS\nTimestamp: $(date)\nEOF"
+    note: "Generating summary report..."
+
+  - send: "echo 'Processing complete'"
+
+  - expect: "Processing complete"
+    timeout: 5
+
+  # Phase 4: Create log
+  - send: "echo '=== PHASE 4: Logging ==="
+
+  - send: "echo \"[$(date)] Pipeline $PIPELINE_NAME completed successfully\" > pipeline/logs/execution.log"
+    note: "Writing execution log..."
+
+  # Phase 5: Validation check
+  - send: "echo '=== PHASE 5: Validation ==="
+
+  - send: "if [ -f pipeline/output/transformed.csv ] && [ -f pipeline/output/summary.txt ]; then echo 'VALIDATION_PASSED'; else echo 'VALIDATION_FAILED'; fi"
+    note: "Running inline validation..."
+
+  - expect: "VALIDATION_PASSED"
+    timeout: 3
+
+  # Final status
+  - send: "echo '=== WORKFLOW COMPLETE ==="
+
+  - send: "exit"
+    note: "Exiting bash shell..."
+
+validations:
+  # Validate directory structure
+  - type: path_exists
+    path: pipeline/input
+    description: "Input directory exists"
+
+  - type: path_exists
+    path: pipeline/output
+    description: "Output directory exists"
+
+  - type: path_exists
+    path: pipeline/logs
+    description: "Logs directory exists"
+
+  # Validate input data
+  - type: path_exists
+    path: pipeline/input/data.csv
+    description: "Input data file created"
+
+  - type: file_contains
+    path: pipeline/input/data.csv
+    text: "id,name,value"
+    description: "Input CSV has correct header"
+
+  - type: file_contains
+    path: pipeline/input/data.csv
+    text: "epsilon,500"
+    description: "Input CSV contains expected data"
+
+  # Validate transformed output
+  - type: path_exists
+    path: pipeline/output/transformed.csv
+    description: "Transformed data file created"
+
+  - type: file_contains
+    path: pipeline/output/transformed.csv
+    text: "ALPHA"
+    description: "Data transformation applied (uppercase)"
+
+  - type: file_contains
+    path: pipeline/output/transformed.csv
+    text: "EPSILON"
+    description: "All records transformed"
+
+  # Validate summary report
+  - type: path_exists
+    path: pipeline/output/summary.txt
+    description: "Summary report created"
+
+  - type: file_contains
+    path: pipeline/output/summary.txt
+    text: "Pipeline: orchestro-test-pipeline"
+    description: "Summary contains pipeline name from environment"
+
+  - type: file_contains
+    path: pipeline/output/summary.txt
+    text: "Version: v1.0.0"
+    description: "Summary contains version from environment"
+
+  - type: file_contains
+    path: pipeline/output/summary.txt
+    text: "Records: 5"
+    description: "Summary shows correct record count"
+
+  - type: file_contains
+    path: pipeline/output/summary.txt
+    text: "Total Value: 1500"
+    description: "Summary shows correct sum calculation"
+
+  - type: file_contains
+    path: pipeline/output/summary.txt
+    text: "Status: SUCCESS"
+    description: "Summary indicates successful completion"
+
+  # Validate execution log
+  - type: path_exists
+    path: pipeline/logs/execution.log
+    description: "Execution log created"
+
+  - type: file_contains
+    path: pipeline/logs/execution.log
+    text: "Pipeline orchestro-test-pipeline completed successfully"
+    description: "Execution log contains success message"

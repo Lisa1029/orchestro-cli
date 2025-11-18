@@ -1,0 +1,181 @@
+{
+  "project_path": "/home/jonbrookings/vibe_coding_projects/my-orchestro-copy/examples/sample_tui_app",
+  "entry_screen": "MainMenuScreen",
+  "screens": {
+    "MainMenuScreen": {
+      "name": "MainMenuScreen",
+      "class_name": "MainMenuScreen",
+      "file_path": "/home/jonbrookings/vibe_coding_projects/my-orchestro-copy/examples/sample_tui_app/app.py",
+      "keybindings": [
+        {
+          "key": "s",
+          "action": "goto_settings",
+          "description": "Settings",
+          "show_in_footer": true
+        },
+        {
+          "key": "d",
+          "action": "goto_dashboard",
+          "description": "Dashboard",
+          "show_in_footer": true
+        },
+        {
+          "key": "q",
+          "action": "quit",
+          "description": "Quit",
+          "show_in_footer": true
+        }
+      ],
+      "widgets": [
+        {
+          "type": "Header",
+          "id": null,
+          "attributes": {}
+        },
+        {
+          "type": "Footer",
+          "id": null,
+          "attributes": {}
+        },
+        {
+          "type": "Container",
+          "id": "main-menu",
+          "attributes": {}
+        }
+      ],
+      "methods": [
+        "compose",
+        "on_button_pressed",
+        "action_goto_settings",
+        "action_goto_dashboard",
+        "action_quit"
+      ],
+      "navigation_targets": [
+        "settings",
+        "dashboard"
+      ]
+    },
+    "SettingsScreen": {
+      "name": "SettingsScreen",
+      "class_name": "SettingsScreen",
+      "file_path": "/home/jonbrookings/vibe_coding_projects/my-orchestro-copy/examples/sample_tui_app/app.py",
+      "keybindings": [
+        {
+          "key": "escape",
+          "action": "go_back",
+          "description": "Back",
+          "show_in_footer": true
+        },
+        {
+          "key": "q",
+          "action": "quit",
+          "description": "Quit",
+          "show_in_footer": true
+        }
+      ],
+      "widgets": [
+        {
+          "type": "Header",
+          "id": null,
+          "attributes": {}
+        },
+        {
+          "type": "Footer",
+          "id": null,
+          "attributes": {}
+        },
+        {
+          "type": "Container",
+          "id": "settings-container",
+          "attributes": {}
+        }
+      ],
+      "methods": [
+        "__init__",
+        "compose",
+        "on_button_pressed",
+        "on_switch_changed",
+        "action_go_back",
+        "action_quit"
+      ],
+      "navigation_targets": []
+    },
+    "DashboardScreen": {
+      "name": "DashboardScreen",
+      "class_name": "DashboardScreen",
+      "file_path": "/home/jonbrookings/vibe_coding_projects/my-orchestro-copy/examples/sample_tui_app/app.py",
+      "keybindings": [
+        {
+          "key": "escape",
+          "action": "go_back",
+          "description": "Back",
+          "show_in_footer": true
+        },
+        {
+          "key": "r",
+          "action": "refresh_data",
+          "description": "Refresh",
+          "show_in_footer": true
+        },
+        {
+          "key": "q",
+          "action": "quit",
+          "description": "Quit",
+          "show_in_footer": true
+        }
+      ],
+      "widgets": [
+        {
+          "type": "Header",
+          "id": null,
+          "attributes": {}
+        },
+        {
+          "type": "Footer",
+          "id": null,
+          "attributes": {}
+        },
+        {
+          "type": "Container",
+          "id": "dashboard-container",
+          "attributes": {}
+        }
+      ],
+      "methods": [
+        "compose",
+        "on_mount",
+        "on_button_pressed",
+        "action_go_back",
+        "action_refresh_data",
+        "action_quit"
+      ],
+      "navigation_targets": []
+    }
+  },
+  "navigation_paths": [
+    {
+      "start": "MainMenuScreen",
+      "end": "settings",
+      "steps": [
+        {
+          "type": "keybinding",
+          "action": "s",
+          "target": "settings"
+        }
+      ],
+      "cost": 1
+    },
+    {
+      "start": "MainMenuScreen",
+      "end": "dashboard",
+      "steps": [
+        {
+          "type": "keybinding",
+          "action": "d",
+          "target": "dashboard"
+        }
+      ],
+      "cost": 1
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+name: Keybinding Test - Verify All Shortcuts
+description: Automatically generated test for all keybindings
+steps:
+- name: Start application
+  command: python /home/jonbrookings/vibe_coding_projects/my-orchestro-copy/examples/sample_tui_app/app.py
+  timeout: 5
+- name: Wait for app to initialize
+  wait: 1
+- name: Testing keybindings for MainMenuScreen
+  comment: 'Screen: MainMenuScreen'
+- name: Test s -> Settings
+  keystroke: s
+- name: Wait for action
+  wait: 0.5
+- name: Capture after s
+  screenshot: mainmenuscreen_s.png
+- name: Return to previous screen
+  keystroke: escape
+- name: Wait for return
+  wait: 0.5
+- name: Test d -> Dashboard
+  keystroke: d
+- name: Wait for action
+  wait: 0.5
+- name: Capture after d
+  screenshot: mainmenuscreen_d.png
+- name: Return to previous screen
+  keystroke: escape
+- name: Wait for return
+  wait: 0.5
+- name: Testing keybindings for SettingsScreen
+  comment: 'Screen: SettingsScreen'
+- name: Test escape -> Back
+  keystroke: escape
+- name: Wait for action
+  wait: 0.5
+- name: Capture after escape
+  screenshot: settingsscreen_escape.png
+- name: Testing keybindings for DashboardScreen
+  comment: 'Screen: DashboardScreen'
+- name: Test escape -> Back
+  keystroke: escape
+- name: Wait for action
+  wait: 0.5
+- name: Capture after escape
+  screenshot: dashboardscreen_escape.png
+- name: Test r -> Refresh
+  keystroke: r
+- name: Wait for action
+  wait: 0.5
+- name: Capture after r
+  screenshot: dashboardscreen_r.png
+- name: Quit application
+  keystroke: q
+- name: Wait for shutdown
+  wait: 1

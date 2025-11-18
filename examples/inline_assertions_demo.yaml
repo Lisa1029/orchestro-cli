@@ -1,0 +1,57 @@
+name: Inline Assertions Demo
+description: Demonstrates the new inline assertion feature for concise testing
+command: bash
+timeout: 10
+
+steps:
+  # Example 1: Basic output assertion
+  - send: "echo 'Hello, World!'"
+  - expect_output: "Hello, World!"
+
+  # Example 2: Check exit code
+  - send: "true"
+  - expect_code: 0
+
+  # Example 3: Contains assertion
+  - send: "echo 'The quick brown fox'"
+  - expect_contains: "quick"
+
+  # Example 4: Regex pattern matching
+  - send: "echo '123456'"
+  - expect_regex: "^\\d+$"
+
+  # Example 5: Line count
+  - send: "printf 'line1\\nline2\\nline3'"
+  - expect_lines: 3
+
+  # Example 6: Not contains (verify no errors)
+  - send: "echo 'Success!'"
+  - expect_not_contains: "error"
+
+  # Example 7: Multiple assertions on one step
+  - send: "echo 'test output'"
+  - expect_output: "test output"
+    expect_contains: "test"
+    expect_regex: "^test"
+    expect_lines: 1
+
+  # Example 8: JSON validation
+  - send: "echo '{\"name\":\"test\",\"value\":42}'"
+  - expect_json:
+      name: "test"
+      value: 42
+
+  # Example 9: Complex scenario with multiple steps
+  - note: "Testing a command that might fail"
+  - send: "ls /nonexistent 2>&1 || echo 'Command failed as expected'"
+  - expect_contains: "failed as expected"
+
+  # Example 10: Verify command output format
+  - send: "date '+%Y-%m-%d'"
+  - expect_regex: "^\\d{4}-\\d{2}-\\d{2}$"
+
+# Legacy validations still work alongside inline assertions
+validations:
+  - type: path_exists
+    path: /tmp
+    description: Verify /tmp directory exists

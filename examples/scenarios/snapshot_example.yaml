@@ -1,0 +1,12 @@
+name: "Snapshot Testing Example"
+description: "Example scenario for demonstrating snapshot testing"
+
+command: "python -c \"print('Hello from snapshot test'); import sys; sys.exit(0)\""
+
+timeout: 10.0
+
+steps:
+  - note: "Waiting for command output"
+    send: ""
+
+validations: []

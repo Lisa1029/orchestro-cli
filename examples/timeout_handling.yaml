@@ -1,0 +1,163 @@
+name: Timeout Configuration Demonstration
+description: |
+  Demonstrates various timeout configurations and handling in Orchestro.
+  Shows how to use different timeout values for different operations.
+
+  This example demonstrates:
+  - Global timeout vs step-specific timeouts
+  - Quick operations with short timeouts
+  - Long-running operations with extended timeouts
+  - Timeout best practices
+  - Fallback patterns for slow operations
+
+  Timeout hierarchy:
+  1. Step-level timeout (highest priority) - overrides global
+  2. Global scenario timeout (default fallback)
+
+  Best practices shown:
+  - Use short timeouts for fast operations (1-5s)
+  - Use medium timeouts for normal operations (5-15s)
+  - Use long timeouts for slow operations (15-60s)
+  - Set global timeout to worst-case scenario
+
+  Requirements: Bash shell with sleep command
+
+command: bash
+timeout: 120  # Global timeout - covers all operations
+
+steps:
+  # Quick operation - short timeout
+  - expect: "[$#]"
+    timeout: 2
+    note: "Waiting for bash prompt (quick operation, 2s timeout)..."
+
+  # Instant operation
+  - send: "echo 'Quick operation'"
+    note: "Sending quick command..."
+
+  - expect: "Quick operation"
+    timeout: 1
+    note: "Expecting immediate output (1s timeout)..."
+
+  # Simulate a medium-speed operation
+  - send: "echo 'Starting medium operation...'; sleep 3; echo 'Medium complete'"
+    note: "Sending medium-speed command (takes ~3 seconds)..."
+
+  - expect: "Starting medium operation"
+    timeout: 5
+    note: "Waiting for operation start (5s timeout)..."
+
+  - expect: "Medium complete"
+    timeout: 10
+    note: "Waiting for medium operation completion (10s timeout covers 3s sleep + overhead)..."
+
+  # Simulate a slow operation
+  - send: "echo 'Starting slow operation...'; sleep 8; echo 'Slow complete'"
+    note: "Sending slow command (takes ~8 seconds)..."
+
+  - expect: "Starting slow operation"
+    timeout: 5
+    note: "Waiting for slow operation start..."
+
+  - expect: "Slow complete"
+    timeout: 15
+    note: "Waiting for slow operation completion (15s timeout covers 8s sleep + overhead)..."
+
+  # Multiple sequential operations with different timeouts
+  - send: "for i in 1 2 3; do echo \"Step $i\"; sleep 1; done"
+    note: "Running multi-step loop (3 steps, 1s each)..."
+
+  - expect: "Step 1"
+    timeout: 3
+    note: "Waiting for step 1..."
+
+  - expect: "Step 2"
+    timeout: 3
+    note: "Waiting for step 2..."
+
+  - expect: "Step 3"
+    timeout: 3
+    note: "Waiting for step 3..."
+
+  # Very slow operation - demonstrating extended timeout
+  - send: "echo 'Starting very slow operation...'; sleep 15; echo 'Very slow complete'; echo 'Results ready'"
+    note: "Sending very slow command (takes ~15 seconds)..."
+
+  - expect: "Starting very slow operation"
+    timeout: 5
+    note: "Waiting for very slow operation start..."
+
+  - expect: "Very slow complete"
+    timeout: 25
+    note: "Waiting for very slow operation (25s timeout covers 15s sleep + overhead)..."
+
+  # Create output file with timing information
+  - send: "cat > timeout_test_results.txt << 'EOF'\n=== Timeout Test Results ===\nTest completed: $(date)\nAll timeout configurations worked correctly:\n- Quick operations: 1-2s timeouts\n- Medium operations: 5-10s timeouts\n- Slow operations: 15-25s timeouts\n- Very slow operations: 25-30s timeouts\nStatus: SUCCESS\nEOF"
+    note: "Creating results file..."
+
+  - send: "echo 'Results written'"
+
+  - expect: "Results written"
+    timeout: 3
+
+  # Demonstrate timeout for screenshot operations
+  - send: "mkdir -p artifacts/screenshots; echo 'Screenshot simulation' > artifacts/screenshots/timeout-test.txt"
+    note: "Simulating screenshot operation with file creation..."
+
+  - expect: ".*"
+    timeout: 5
+    note: "Waiting for file operation completion..."
+
+  # Final status
+  - send: "echo '=== All timeout scenarios completed successfully ==='"
+
+  - expect: "All timeout scenarios completed successfully"
+    timeout: 3
+
+  # Clean exit
+  - send: "exit"
+    note: "Exiting bash..."
+
+validations:
+  # Validate that operations completed
+  - type: path_exists
+    path: timeout_test_results.txt
+    description: "Results file created (proves slow operations completed)"
+
+  - type: file_contains
+    path: timeout_test_results.txt
+    text: "Status: SUCCESS"
+    description: "All operations completed successfully"
+
+  - type: file_contains
+    path: timeout_test_results.txt
+    text: "Quick operations: 1-2s timeouts"
+    description: "Quick timeout configurations documented"
+
+  - type: file_contains
+    path: timeout_test_results.txt
+    text: "Very slow operations: 25-30s timeouts"
+    description: "Extended timeout configurations documented"
+
+  # Validate screenshot simulation
+  - type: path_exists
+    path: artifacts/screenshots/timeout-test.txt
+    description: "Screenshot simulation file created"
+
+# TIMEOUT BEST PRACTICES SUMMARY:
+#
+# 1. Set global timeout to worst-case scenario (all steps combined + buffer)
+# 2. Use step-specific timeouts for fine-grained control
+# 3. Add 20-30% buffer to expected operation time
+# 4. Quick operations: 1-5s
+# 5. Normal operations: 5-15s
+# 6. Slow operations: 15-30s
+# 7. Very slow operations: 30-60s
+# 8. Screenshot operations: 10-20s (TUI apps need rendering time)
+# 9. Interactive prompts: 5-10s (depends on app responsiveness)
+# 10. File operations: 3-10s (depends on I/O speed)
+#
+# TIMEOUT ERRORS:
+# - If step times out: increase step timeout
+# - If global times out: increase global timeout or optimize steps
+# - If screenshots timeout: ensure app has screenshot monitoring enabled

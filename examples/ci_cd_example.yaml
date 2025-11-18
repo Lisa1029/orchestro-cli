@@ -1,0 +1,30 @@
+# Example CI/CD scenario with JUnit XML reporting
+# This scenario demonstrates how to use Orchestro CLI with CI/CD systems
+
+name: CI/CD Integration Example
+description: |
+  Example scenario showing JUnit XML report generation for CI/CD integration.
+  Run with: orchestro examples/ci_cd_example.yaml --junit-xml=test-results/junit.xml
+
+# Command to test
+command: echo "Testing CI/CD integration"
+
+# Timeout in seconds
+timeout: 10
+
+# Environment variables
+env:
+  TEST_ENV: ci
+
+# Test steps
+steps:
+  - note: "Verifying application output"
+    expect: "Testing CI/CD"
+
+  - note: "Sending test input"
+    send: "test input"
+
+# Validations (optional)
+validations:
+  - type: path_exists
+    path: examples/ci_cd_example.yaml

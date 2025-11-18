@@ -1,0 +1,56 @@
+name: File Creation and Validation Test
+description: |
+  Demonstrates file creation validation and content checking.
+  Tests a bash script that creates files with specific content.
+
+  This example shows:
+  - Creating files via shell commands
+  - path_exists validation type
+  - file_contains validation with regex patterns
+  - Multi-file validation workflow
+
+  Requirements: Bash shell, standard Unix utilities
+
+command: ["bash", "-c", "mkdir -p test_output && echo 'Test started at: '$(date) > test_output/log.txt && echo 'Success: 42 records processed' > test_output/results.txt && echo 'Configuration: enabled=true' > test_output/config.ini && sleep 1"]
+timeout: 10
+
+steps:
+  # Wait for command completion
+  - note: "Executing file creation script..."
+
+  # Give the command time to complete
+  # (Using expect with EOF waits for command to finish)
+  - expect: "(?s).*"
+    timeout: 5
+    note: "Waiting for script completion..."
+
+# Validate the created files and their contents
+validations:
+  # Check that all files were created
+  - type: path_exists
+    path: test_output/log.txt
+    description: "Log file created"
+
+  - type: path_exists
+    path: test_output/results.txt
+    description: "Results file created"
+
+  - type: path_exists
+    path: test_output/config.ini
+    description: "Configuration file created"
+
+  # Validate file contents with regex patterns
+  - type: file_contains
+    path: test_output/log.txt
+    text: "Test started at:.*"
+    description: "Log file contains timestamp"
+
+  - type: file_contains
+    path: test_output/results.txt
+    text: "Success.*\\d+ records processed"
+    description: "Results show successful processing with record count"
+
+  - type: file_contains
+    path: test_output/config.ini
+    text: "enabled=true"
+    description: "Configuration file has correct setting"

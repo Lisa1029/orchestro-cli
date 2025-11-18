@@ -1,0 +1,80 @@
+name: Auto Label Issues & PRs
+
+on:
+  issues:
+    types: [opened]
+  pull_request:
+    types: [opened]
+
+jobs:
+  label:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+    steps:
+      - name: Auto Label
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const item = context.payload.issue || context.payload.pull_request;
+            const title = item.title.toLowerCase();
+            const body = (item.body || '').toLowerCase();
+            const labels = [];
+
+            // Type labels
+            if (title.includes('bug') || body.includes('bug') || title.includes('error')) {
+              labels.push('bug');
+            }
+            if (title.includes('feat') || title.includes('feature') || body.includes('feature request')) {
+              labels.push('enhancement');
+            }
+            if (title.includes('doc') || body.includes('documentation')) {
+              labels.push('documentation');
+            }
+            if (title.includes('test') || body.includes('testing')) {
+              labels.push('testing');
+            }
+            if (title.includes('security') || body.includes('security')) {
+              labels.push('security');
+            }
+            if (title.includes('performance') || title.includes('perf') || body.includes('slow')) {
+              labels.push('performance');
+            }
+
+            // Difficulty labels
+            if (body.includes('good first issue') || body.includes('beginner')) {
+              labels.push('good first issue');
+            }
+
+            // Component labels
+            if (body.includes('api') || title.includes('api')) {
+              labels.push('api');
+            }
+            if (body.includes('parallel') || title.includes('parallel') || title.includes('worker')) {
+              labels.push('parallel');
+            }
+            if (body.includes('scheduler') || title.includes('scheduler')) {
+              labels.push('scheduler');
+            }
+            if (body.includes('intelligence') || title.includes('intelligence') || title.includes('ast')) {
+              labels.push('intelligence');
+            }
+            if (body.includes('cli') || title.includes('cli') || title.includes('command')) {
+              labels.push('cli');
+            }
+
+            // Add labels if any found
+            if (labels.length > 0) {
+              const itemNumber = item.number;
+              const endpoint = context.payload.issue ? 'issues' : 'pulls';
+
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: itemNumber,
+                labels: labels
+              });
+
+              console.log(`Added labels: ${labels.join(', ')}`);
+            }
