@@ -1,0 +1,16 @@
+# GitHub Sponsors configuration
+# This file tells GitHub where users can sponsor this project
+
+github: [jonthemediocre]
+
+# Other funding platforms (uncomment and add if applicable)
+# patreon: orchestro
+# open_collective: orchestro
+# ko_fi: orchestro
+# tidelift: pypi/orchestro-cli
+# community_bridge: orchestro
+# liberapay: orchestro
+# issuehunt: orchestro
+# otechie: orchestro
+# lfx_crowdfunding: orchestro
+# custom: ['https://www.paypal.me/orchestro', 'https://buymeacoffee.com/orchestro']
